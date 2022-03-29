@@ -15,23 +15,31 @@ fn main() {
 fn get_histfile_path() -> PathBuf {
     let mut hist_file = PathBuf::new();
 
-    match env::var("XDG_CONFIG_HOME") {
-        Ok(xdg_config_home_value) => hist_file.push(xdg_config_home_value),
-        Err(_) => {
-            eprintln!("No XDG_CONFIG_HOME environment variable set, falling back to $HOME/.config");
+    let hist_file_result = env::var("HISTFILE");
 
-            match env::var("HOME") {
-                Ok(home_value) => hist_file.push(home_value),
-                Err(e) => {
-                    eprintln!("No HOME environment variable set, aborting...");
-                    panic!("{}", e);
+    if let Ok(path) = hist_file_result {
+        hist_file.push(path);
+    } else {
+        match env::var("XDG_CONFIG_HOME") {
+            Ok(xdg_config_home_value) => hist_file.push(xdg_config_home_value),
+            Err(_) => {
+                eprintln!(
+                    "No XDG_CONFIG_HOME environment variable set, falling back to $HOME/.config"
+                );
+
+                match env::var("HOME") {
+                    Ok(home_value) => hist_file.push(home_value),
+                    Err(e) => {
+                        eprintln!("No HOME environment variable set, aborting...");
+                        panic!("{}", e);
+                    }
                 }
+                hist_file.push(".config");
             }
-            hist_file.push(".config");
-        }
-    };
+        };
 
-    hist_file.push(Path::new("zsh/histfile"));
+        hist_file.push(Path::new("zsh/histfile"));
+    }
 
     hist_file
 }
