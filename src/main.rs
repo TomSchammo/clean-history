@@ -5,11 +5,14 @@ fn main() {
 
 #[cfg(unix)]
 use std::env;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 fn main() {
     let hist_file = get_histfile_path();
-    println!("{}", hist_file.to_str().unwrap());
+    println!("{}", filter(hist_file).len());
 }
 
 fn get_histfile_path() -> PathBuf {
@@ -42,6 +45,23 @@ fn get_histfile_path() -> PathBuf {
     }
 
     hist_file
+}
+
+fn filter(hist_file: PathBuf) -> Vec<String> {
+    let mut filtered = Vec::new();
+
+    if let Ok(buffer) = fs::read(hist_file) {
+        let str = String::from_utf8_lossy(&buffer);
+        let lines = str.lines();
+
+        for line in lines {
+            if !filtered.contains(&line.to_string()) {
+                filtered.push(line.to_string());
+            }
+        }
+    }
+
+    filtered
 }
 
 #[cfg(test)]
