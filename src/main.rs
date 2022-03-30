@@ -54,15 +54,18 @@ mod tests {
     struct Environment {
         home: String,
         xdg_config_home: String,
+        hist_file_path: String,
     }
 
     impl Drop for Environment {
         fn drop(&mut self) {
             let h = self.home.clone();
             let x = self.xdg_config_home.clone();
+            let i = self.hist_file_path.clone();
 
             env::set_var("HOME", h);
             env::set_var("XDG_CONFIG_HOME", x);
+            env::set_var("HISTFILE", i);
         }
     }
 
@@ -70,14 +73,19 @@ mod tests {
         fn new() -> Self {
             let home = env::var("HOME");
             let xdg_config_home = env::var("XDG_CONFIG_HOME");
+            let hist_file_path = env::var("HISTFILE");
 
-            if home.is_err() || xdg_config_home.is_err() {
+            if home.is_err() || xdg_config_home.is_err() || hist_file_path.is_err() {
                 if let Err(e) = home {
-                    println!("{}", e)
+                    eprintln!("HOME: {}", e)
                 };
 
                 if let Err(e) = xdg_config_home {
-                    println!("{}", e)
+                    eprintln!("XDG_CONFIG_HOME: {}", e)
+                };
+
+                if let Err(e) = hist_file_path {
+                    eprintln!("HISTFILE: {}", e)
                 };
                 panic!("Cannot retrieve environment variables");
             }
@@ -85,12 +93,18 @@ mod tests {
             Environment {
                 home: home.unwrap(),
                 xdg_config_home: xdg_config_home.unwrap(),
+                hist_file_path: hist_file_path.unwrap(),
             }
         }
 
-        fn prepare(home: Option<&str>, xdg_config_home: Option<&str>) {
-            env::remove_var("HOME");
-            env::remove_var("XDG_CONFIG_HOME");
+        fn prepare(
+            home: Option<&str>,
+            xdg_config_home: Option<&str>,
+            hist_file_path: Option<&str>,
+        ) {
+            // env::remove_var("HOME");
+            // env::remove_var("XDG_CONFIG_HOME");
+            // env::remove_var("HISTFILE");
 
             if let Some(home) = home {
                 env::set_var("HOME", home);
@@ -98,6 +112,10 @@ mod tests {
 
             if let Some(xdg_config_home) = xdg_config_home {
                 env::set_var("XDG_CONFIG_HOME", xdg_config_home);
+            }
+
+            if let Some(hist_file_path) = hist_file_path {
+                env::set_var("HISTFILE", hist_file_path);
             }
         }
     }
@@ -109,9 +127,24 @@ mod tests {
     }
 
     #[test]
+    fn test_get_histfile_path_histfile_set() {
+        let _ = Environment::new();
+        tests::Environment::prepare(
+            Some("/home"),
+            Some("/home/config"),
+            Some("/home/user/.config/zsh/history"),
+        );
+
+        assert_eq!(
+            get_histfile_path().to_str().unwrap(),
+            "/home/user/.config/zsh/history"
+        );
+    }
+
+    #[test]
     fn test_get_histfile_path_xdg_config_home_set() {
         let _ = Environment::new();
-        tests::Environment::prepare(Some("/home/"), Some("/home/user/config"));
+        tests::Environment::prepare(Some("/home/"), Some("/home/user/config"), None);
 
         assert_eq!(
             get_histfile_path().to_str().unwrap(),
@@ -122,7 +155,7 @@ mod tests {
     #[test]
     fn test_get_histfile_path_home_set() {
         let _ = Environment::new();
-        tests::Environment::prepare(Some("/home/user"), None);
+        tests::Environment::prepare(Some("/home/user"), None, None);
 
         assert_eq!(
             get_histfile_path().to_str().unwrap(),
@@ -134,7 +167,7 @@ mod tests {
     #[should_panic]
     fn test_get_histfile_path_nothing_set() {
         let _ = Environment::new();
-        tests::Environment::prepare(None, None);
+        tests::Environment::prepare(None, None, None);
 
         let _ = get_histfile_path();
     }
