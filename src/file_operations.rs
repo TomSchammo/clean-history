@@ -23,6 +23,54 @@ pub fn filter(hist_file: PathBuf) -> Vec<String> {
     filtered
 }
 
+/// Writes all the changes back to the shell history
+///
+/// # Errors
+///
+/// - `HistFileError::NoTempFile` if the temporary directory cannot be created to save the history
+/// - `HistFileError::NoWritableTempFile` if the history cannot be saved to the temporary directory
+/// - `HistFileError::FailedWrite` if there was an error by `std::fs::write` and the new history
+/// file has not successfully been created.
+///
+/// # Panics
+///
+/// If the new history file cannot be created and the old history file cannot be restored.
+fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
+    if let Ok(temp_file) = get_temp_file(&hist_file) {
+        match fs::rename(hist_file.clone(), temp_file.clone()) {
+            Ok(_) => match fs::write(hist_file.clone(), data) {
+                Ok(_) => Ok(()),
+                Err(e) => {
+                    eprintln!("Cannot write data to history file!");
+                    eprintln!("{}", e);
+                    println!("Trying to restore old version...");
+                    if restore(temp_file, hist_file).is_ok() {
+                        println!("Rollback was successful!");
+                        Err(HistFileError::FailedWrite)
+                    } else {
+                        eprintln!("Could not restore old version!");
+                        panic!("Panicing!");
+                    }
+                }
+            },
+            Err(e) => {
+                eprintln!("Cannot save history to temporary directory! Aborting...");
+                eprintln!("{}", e);
+                Err(HistFileError::NoWritableTempFile)
+            }
+        }
+    } else {
+        eprintln!("Could not create temporary file! Aborting...");
+        Err(HistFileError::NoTempFile)
+    }
+}
+
+enum HistFileError {
+    NoTempFile,
+    NoWritableTempFile,
+    FailedWrite,
+}
+
 /// Creates a temporary directory that the history file can be moved to,
 /// so that the old history can be recovered in case of an error.
 ///
