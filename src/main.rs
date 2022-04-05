@@ -9,5 +9,5 @@ mod setup;
 
 fn main() {
     let hist_file = setup::get_histfile_path();
-    println!("{}", file_operations::filter(hist_file).len());
+    // println!("{}", file_operations::get_filtered_history(hist_file).len());
 }

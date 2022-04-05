@@ -6,7 +6,8 @@ use std::{
     path::PathBuf,
 };
 
-pub fn filter(hist_file: PathBuf) -> Vec<String> {
+/// Filters all the duplicate lines out of the history file
+fn get_filtered_history(hist_file: PathBuf) -> Vec<String> {
     let mut filtered = Vec::new();
 
     if let Ok(buffer) = fs::read(hist_file) {
