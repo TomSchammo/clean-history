@@ -23,6 +23,19 @@ pub fn filter(hist_file: PathBuf) -> Vec<String> {
     filtered
 }
 
+/// Turns the String vector that contains the lines into a byte vector
+/// that can be written to a file.
+fn get_filtered_history_bytes(history: Vec<String>) -> Vec<u8> {
+    let mut filtered_bytes: Vec<u8> = Vec::new();
+
+    for line in history {
+        let mut var = line.as_bytes().to_vec();
+        filtered_bytes.append(&mut var);
+    }
+
+    filtered_bytes
+}
+
 /// Writes all the changes back to the shell history
 ///
 /// # Errors
