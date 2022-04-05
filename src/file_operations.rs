@@ -81,6 +81,11 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
             },
             Err(e) => {
                 eprintln!("Cannot save history to temporary directory! Aborting...");
+                eprintln!(
+                    "Cannot {} -> {}",
+                    hist_file.to_str().unwrap_or(PATH_DISPLAY_ERROR),
+                    temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
+                );
                 eprintln!("{}", e);
                 Err(HistFileError::NoWritableTempFile)
             }
