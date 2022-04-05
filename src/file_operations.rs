@@ -6,6 +6,8 @@ use std::{
     path::PathBuf,
 };
 
+const PATH_DISPLAY_ERROR: &str = "Cannot display path";
+
 pub fn filter(hist_file: PathBuf) {
     let filtered_history = get_filtered_history_bytes(get_filtered_history(hist_file.clone()));
 
@@ -119,7 +121,7 @@ fn get_temp_file(hist_file: &Path) -> Result<PathBuf, Error> {
             Err(e) => {
                 eprintln!(
                     "Could not create '{}'",
-                    temp_file.to_str().unwrap_or("Cannot display path")
+                    temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
                 );
                 return Err(e);
             }
@@ -151,7 +153,7 @@ fn restore(recovery_file: PathBuf, hist_file: PathBuf) -> io::Result<()> {
             eprintln!("Could not recover file!");
             eprintln!(
                 "Recovery file is located at '{}'",
-                recovery_file.to_str().unwrap_or("Cannot display path")
+                recovery_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
             );
             Err(e)
         }
