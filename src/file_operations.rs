@@ -62,7 +62,14 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
 
     match fs::rename(hist_file.clone(), temp_file.clone()) {
         Ok(_) => match fs::write(hist_file.clone(), data) {
-            Ok(_) => Ok(()),
+            Ok(_) => match fs::remove_file(temp_file) {
+                Ok(_) => Ok(()),
+                Err(e) => {
+                    eprintln!("Could not clean up old history file");
+                    eprintln!("{e}");
+                    Err(HistFileError::CleanupError)
+                }
+            },
             Err(e) => {
                 eprintln!("Cannot write data to history file!");
                 eprintln!("{e}");
@@ -92,6 +99,7 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
 enum HistFileError {
     NoWritableTempFile,
     FailedWrite,
+    CleanupError,
 }
 
 /// Creates a temporary file that the history file can be copied to,
