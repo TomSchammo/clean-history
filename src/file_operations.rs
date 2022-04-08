@@ -1,6 +1,7 @@
 use std::{fs, io, path::Path, path::PathBuf};
 
 const PATH_DISPLAY_ERROR: &str = "Cannot display path";
+const NEWLINE_BYTES: &[u8] = "\n".as_bytes();
 
 pub fn filter(hist_file: PathBuf) {
     let filtered_history = get_filtered_history_bytes(get_filtered_history(hist_file.clone()));
@@ -37,6 +38,7 @@ fn get_filtered_history_bytes(history: Vec<String>) -> Vec<u8> {
 
     for line in history {
         let mut var = line.as_bytes().to_vec();
+        var.append(&mut NEWLINE_BYTES.to_vec());
         filtered_bytes.append(&mut var);
     }
 
