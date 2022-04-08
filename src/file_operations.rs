@@ -68,7 +68,7 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
                 Ok(_) => Ok(()),
                 Err(e) => {
                     eprintln!("Cannot write data to history file!");
-                    eprintln!("{}", e);
+                    eprintln!("{e}");
                     println!("Trying to restore old version...");
                     if restore(temp_file, hist_file).is_ok() {
                         println!("Rollback was successful!");
@@ -86,7 +86,7 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
                     hist_file.to_str().unwrap_or(PATH_DISPLAY_ERROR),
                     temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
                 );
-                eprintln!("{}", e);
+                eprintln!("{e}");
                 Err(HistFileError::NoWritableTempFile)
             }
         }
@@ -135,7 +135,7 @@ fn get_temp_file(hist_file: &Path) -> Result<PathBuf, Error> {
 
     if let Some(hist_file_name) = (*hist_file).file_name() {
         if let Some(hist_file_name) = hist_file_name.to_str() {
-            temp_file.push(format!("{}.tmp", hist_file_name));
+            temp_file.push(format!("{hist_file_name}.tmp"));
         } else {
             temp_file.push(hist_file_name);
         }

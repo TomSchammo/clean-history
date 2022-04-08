@@ -20,7 +20,7 @@ pub fn get_histfile_path() -> PathBuf {
                     Ok(home_value) => hist_file.push(home_value),
                     Err(e) => {
                         eprintln!("No HOME environment variable set, aborting...");
-                        panic!("{}", e);
+                        panic!("{e}");
                     }
                 }
                 hist_file.push(".config");
