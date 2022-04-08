@@ -8,8 +8,13 @@ pub fn filter(hist_file: PathBuf) {
 
     let result = write(filtered_history, hist_file);
 
-    if result.is_err() {
-        eprintln!("Could not filter history!");
+    if let Err(..) = result {
+        match result.unwrap_err() {
+            HistFileError::CleanupError => eprintln!("Could not clean up program!"),
+            _ => eprintln!("Could not filter history!"),
+        }
+    } else {
+        println!("Successfully filtered history!")
     }
 }
 
@@ -96,6 +101,7 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
     }
 }
 
+#[derive(PartialEq, Eq)]
 enum HistFileError {
     NoWritableTempFile,
     FailedWrite,
