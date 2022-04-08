@@ -1,10 +1,4 @@
-use std::{
-    env::current_exe,
-    fs,
-    io::{self, Error},
-    path::Path,
-    path::PathBuf,
-};
+use std::{fs, io, path::Path, path::PathBuf};
 
 const PATH_DISPLAY_ERROR: &str = "Cannot display path";
 
@@ -62,76 +56,48 @@ fn get_filtered_history_bytes(history: Vec<String>) -> Vec<u8> {
 ///
 /// If the new history file cannot be created and the old history file cannot be restored.
 fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
-    if let Ok(temp_file) = get_temp_file(&hist_file) {
-        match fs::rename(hist_file.clone(), temp_file.clone()) {
-            Ok(_) => match fs::write(hist_file.clone(), data) {
-                Ok(_) => Ok(()),
-                Err(e) => {
-                    eprintln!("Cannot write data to history file!");
-                    eprintln!("{e}");
-                    println!("Trying to restore old version...");
-                    if restore(temp_file, hist_file).is_ok() {
-                        println!("Rollback was successful!");
-                        Err(HistFileError::FailedWrite)
-                    } else {
-                        eprintln!("Could not restore old version!");
-                        panic!("Panicing!");
-                    }
-                }
-            },
+    let temp_file = get_temp_file(&hist_file);
+
+    match fs::rename(hist_file.clone(), temp_file.clone()) {
+        Ok(_) => match fs::write(hist_file.clone(), data) {
+            Ok(_) => Ok(()),
             Err(e) => {
-                eprintln!("Cannot save history to temporary directory! Aborting...");
-                eprintln!(
-                    "Cannot {} -> {}",
-                    hist_file.to_str().unwrap_or(PATH_DISPLAY_ERROR),
-                    temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
-                );
+                eprintln!("Cannot write data to history file!");
                 eprintln!("{e}");
-                Err(HistFileError::NoWritableTempFile)
+                println!("Trying to restore old version...");
+                if restore(temp_file, hist_file).is_ok() {
+                    println!("Rollback was successful!");
+                    Err(HistFileError::FailedWrite)
+                } else {
+                    eprintln!("Could not restore old version!");
+                    panic!("Panicing!");
+                }
             }
+        },
+        Err(e) => {
+            eprintln!("Cannot save history to temporary directory! Aborting...");
+            eprintln!(
+                "Cannot {} -> {}",
+                hist_file.to_str().unwrap_or(PATH_DISPLAY_ERROR),
+                temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
+            );
+            eprintln!("{e}");
+            Err(HistFileError::NoWritableTempFile)
         }
-    } else {
-        eprintln!("Could not create temporary file! Aborting...");
-        Err(HistFileError::NoTempFile)
     }
 }
 
 enum HistFileError {
-    NoTempFile,
     NoWritableTempFile,
     FailedWrite,
 }
 
-/// Creates a temporary directory that the history file can be moved to,
+/// Creates a temporary file that the history file can be copied to,
 /// so that the old history can be recovered in case of an error.
-///
-/// # Errors
-///
-/// Any error that can occur when calling `std::fs::create_dir_all`.
-fn get_temp_file(hist_file: &Path) -> Result<PathBuf, Error> {
-    let mut temp_file = PathBuf::new();
+fn get_temp_file(hist_file: &Path) -> PathBuf {
+    let mut temp_file = hist_file.to_path_buf();
 
-    temp_file.push("/tmp");
-
-    if let Some(current_exe) = current_exe()
-        .unwrap_or_else(|_| Path::new("clean-histoy").to_path_buf())
-        .file_name()
-    {
-        temp_file.push(current_exe);
-    }
-
-    if !temp_file.exists() {
-        match fs::create_dir_all(temp_file.clone()) {
-            Ok(_) => (),
-            Err(e) => {
-                eprintln!(
-                    "Could not create '{}'",
-                    temp_file.to_str().unwrap_or(PATH_DISPLAY_ERROR)
-                );
-                return Err(e);
-            }
-        }
-    }
+    temp_file.pop();
 
     if let Some(hist_file_name) = (*hist_file).file_name() {
         if let Some(hist_file_name) = hist_file_name.to_str() {
@@ -143,7 +109,7 @@ fn get_temp_file(hist_file: &Path) -> Result<PathBuf, Error> {
         temp_file.push("histfile.tmp");
     }
 
-    Ok(temp_file)
+    temp_file
 }
 
 /// Restores the shell history to the state from before the program started
