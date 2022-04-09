@@ -4,36 +4,42 @@ const PATH_DISPLAY_ERROR: &str = "Cannot display path";
 const NEWLINE_BYTES: &[u8] = "\n".as_bytes();
 
 pub fn filter(hist_file: PathBuf) {
-    let filtered_history = get_filtered_history_bytes(get_filtered_history(hist_file.clone()));
+    if let Some(filtered_history) = get_filtered_history(hist_file.clone()) {
+        let filtered_history_bytes = get_filtered_history_bytes(filtered_history);
 
-    let result = write(filtered_history, hist_file);
+        let result = write(filtered_history_bytes, hist_file);
 
-    if let Err(..) = result {
-        match result.unwrap_err() {
-            HistFileError::CleanupError => eprintln!("Could not clean up program!"),
-            _ => eprintln!("Could not filter history!"),
+        if let Err(..) = result {
+            match result.unwrap_err() {
+                HistFileError::CleanupError => eprintln!("Could not clean up program!"),
+                _ => eprintln!("Could not filter history!"),
+            }
+        } else {
+            println!("Successfully filtered history!")
         }
     } else {
-        println!("Successfully filtered history!")
+        eprintln!("Failed to filter history");
+        eprintln!("Could not read history file");
     }
 }
 
 /// Filters all the duplicate lines out of the history file
-fn get_filtered_history(hist_file: PathBuf) -> Vec<String> {
-    let mut filtered = Vec::new();
-
+fn get_filtered_history(hist_file: PathBuf) -> Option<Vec<String>> {
     if let Ok(buffer) = fs::read(hist_file) {
         let str = String::from_utf8_lossy(&buffer);
-        let lines = str.lines();
+        let lines = str.lines().collect::<Vec<_>>();
+
+        let mut filtered = Vec::with_capacity(lines.len());
 
         for line in lines {
             if !filtered.contains(&line.to_string()) {
                 filtered.push(line.to_string());
             }
         }
+        return Some(filtered);
     }
 
-    filtered
+    None
 }
 
 /// Turns the String vector that contains the lines into a byte vector
