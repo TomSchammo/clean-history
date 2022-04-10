@@ -1,5 +1,7 @@
 # Clean History
 
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+
 A daemon to automatically clean shell histories.
 
 Having my shell history polluted by duplicate commands
