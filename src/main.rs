@@ -19,7 +19,7 @@ struct Args {
     deamonize: bool,
 
     #[clap(
-        short,
+        short = 'H',
         long,
         takes_value = true,
         help = "Provide the path to a history file manually"
