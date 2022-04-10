@@ -27,17 +27,24 @@ struct Args {
     history: Option<String>,
 }
 
+fn start(args: Args) {
+    println!("Starting program...");
+
+    let hist_file = match args.history {
+        Some(arg) => Path::new(&arg).to_path_buf(),
+        None => setup::get_histfile_path(),
+    };
+
+    filter(hist_file);
+}
+
 fn main() {
     let args = Args::parse();
 
     if args.deamonize {
         unimplemented!("Start program as a deamon");
-    } else {
-        let hist_file = match args.history {
-            Some(arg) => Path::new(&arg).to_path_buf(),
-            None => setup::get_histfile_path(),
-        };
 
-        filter(hist_file);
+    } else {
+        start(args);
     }
 }
