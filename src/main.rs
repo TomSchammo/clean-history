@@ -17,8 +17,8 @@ mod setup;
 #[clap(author, version, about, long_about=None)]
 struct Args {
     /// Launch progress as a deamon
-    #[clap(short, long, takes_value = false, help = "Launch program as a deamon")]
-    deamonize: bool,
+    #[clap(short, long, takes_value = false, help = "Launch program as a daemon")]
+    daemonize: bool,
 
     #[clap(
         short = 'H',
@@ -43,7 +43,7 @@ fn start(args: Args) {
 fn main() {
     let args = Args::parse();
 
-    if args.deamonize {
+    if args.daemonize {
         let exec_name = std::env::current_exe()
             .expect("Can't get the exec path")
             .file_name()
