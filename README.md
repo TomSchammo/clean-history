@@ -10,11 +10,24 @@ So I decided to do something about it.
 
 ## Features
 
+### Z-Shell
+
+The program can automatically find the history file of the Z-Shell (generally).
+
+### Removal of duplicates
+
+The program filters out duplicates from your history.
+
+
+## Command line options
+
+- `--daemonize` or `-d` runs the program as a background process in a loop.
+- `--timeout <TIMEOUT>` or `-t <TIMEOUT>` overwrites the default timeout of 1s between iterations when running as a daemon.
+- `--history <HISTFILE_PATH>` or `-h <HISTFILE_PATH>` allows the user to provide a path to their history file.
+  This is generally more robust and therefore recommended.
 
 ## Roadmap
 
-- [ ] Support for Z-Shell
-- [ ] Removal of duplicates
 - [ ] Intelligent file tracking to remove any commands that access/
       interact with files that no longer exist
-- [ ] Support for bash (maybe)
+- [ ] Support for automatically finding bash_history (maybe)
