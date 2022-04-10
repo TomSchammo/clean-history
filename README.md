@@ -1,6 +1,6 @@
 # Clean History
 
-A deamon to automatically clean shell histories.
+A daemon to automatically clean shell histories.
 
 Having my shell history polluted by duplicate commands
 or commands that are specific to a certain folder or file
