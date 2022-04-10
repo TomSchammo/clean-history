@@ -30,10 +30,10 @@ struct Args {
     history: Option<String>,
 }
 
-fn start(args: Args) -> PathBuf {
+fn start(history_arg: Option<String>) -> PathBuf {
     println!("Starting program...");
 
-    match args.history {
+    match history_arg {
         Some(arg) => Path::new(&arg).to_path_buf(),
         None => setup::get_histfile_path(),
     }
@@ -65,7 +65,7 @@ fn main() {
         match daemonize.start() {
             Ok(_) => {
                 println!("Successfully started daemon!");
-                let hist_file = start(args);
+                let hist_file = start(args.history);
             }
             Err(e) => {
                 eprintln!("Error when starting deamon!");
@@ -73,7 +73,7 @@ fn main() {
             }
         }
     } else {
-        let hist_file = start(args);
+        let hist_file = start(args.history);
         filter(hist_file);
     }
 }
