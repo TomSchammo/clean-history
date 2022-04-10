@@ -2,7 +2,7 @@ use self::file_operations::filter;
 use clap::Parser;
 use daemonize::Daemonize;
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[cfg(not(unix))]
 fn main() {
@@ -30,15 +30,13 @@ struct Args {
     history: Option<String>,
 }
 
-fn start(args: Args) {
+fn start(args: Args) -> PathBuf {
     println!("Starting program...");
 
-    let hist_file = match args.history {
+    match args.history {
         Some(arg) => Path::new(&arg).to_path_buf(),
         None => setup::get_histfile_path(),
-    };
-
-    filter(hist_file);
+    }
 }
 
 fn main() {
@@ -67,7 +65,7 @@ fn main() {
         match daemonize.start() {
             Ok(_) => {
                 println!("Successfully started daemon!");
-                start(args);
+                let hist_file = start(args);
             }
             Err(e) => {
                 eprintln!("Error when starting deamon!");
@@ -75,6 +73,7 @@ fn main() {
             }
         }
     } else {
-        start(args);
+        let hist_file = start(args);
+        filter(hist_file);
     }
 }
