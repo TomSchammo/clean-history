@@ -16,10 +16,11 @@ mod setup;
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about=None)]
 struct Args {
-    /// Launch progress as a deamon
+    /// Launch program as a deamon
     #[clap(short, long, takes_value = false, help = "Launch program as a daemon")]
     daemonize: bool,
 
+    /// Provide alternative histfile
     #[clap(
         short = 'H',
         long,
