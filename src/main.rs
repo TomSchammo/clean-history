@@ -3,6 +3,7 @@ use clap::Parser;
 use daemonize::Daemonize;
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use std::{thread, time};
 
 #[cfg(not(unix))]
 fn main() {
@@ -19,6 +20,17 @@ struct Args {
     /// Launch program as a deamon
     #[clap(short, long, takes_value = false, help = "Launch program as a daemon")]
     daemonize: bool,
+
+    /// If the program is running as a daemon, it runs in a loop.
+    /// This is the time between iterations with a default of 1s.
+    #[clap(
+        short,
+        long,
+        takes_value = true,
+        default_value_t = 1000,
+        help = "Time between runs if program is started as a daemon (in ms)"
+    )]
+    timout: u64,
 
     /// Provide alternative histfile
     #[clap(
@@ -66,6 +78,13 @@ fn main() {
             Ok(_) => {
                 println!("Successfully started daemon!");
                 let hist_file = start(args.history);
+
+                loop {
+                    filter(hist_file.clone());
+
+                    let timout = time::Duration::from_millis(args.timout);
+                    thread::sleep(timout);
+                }
             }
             Err(e) => {
                 eprintln!("Error when starting deamon!");
