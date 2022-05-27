@@ -44,7 +44,7 @@ fn get_filtered_history(hist_file: &PathBuf) -> Option<Vec<String>> {
 
 /// Turns the String vector that contains the lines into a byte vector
 /// that can be written to a file.
-fn get_filtered_history_bytes(history: &Vec<String>) -> Vec<u8> {
+fn get_filtered_history_bytes(history: &[String]) -> Vec<u8> {
     let mut filtered_bytes: Vec<u8> = Vec::new();
 
     for line in history {
@@ -68,7 +68,7 @@ fn get_filtered_history_bytes(history: &Vec<String>) -> Vec<u8> {
 /// # Panics
 ///
 /// If the new history file cannot be created and the old history file cannot be restored.
-fn write(data: &Vec<u8>, hist_file: &PathBuf) -> Result<(), HistFileError> {
+fn write(data: &[u8], hist_file: &PathBuf) -> Result<(), HistFileError> {
     let temp_file = get_temp_file(hist_file);
 
     match fs::rename(hist_file, temp_file.clone()) {
