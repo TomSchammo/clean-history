@@ -80,7 +80,7 @@ fn main() {
                 let hist_file = start(args.history);
 
                 loop {
-                    filter(hist_file.clone());
+                    filter(&hist_file.clone());
 
                     let timout = time::Duration::from_millis(args.timout);
                     thread::sleep(timout);
@@ -93,6 +93,6 @@ fn main() {
         }
     } else {
         let hist_file = start(args.history);
-        filter(hist_file);
+        filter(&hist_file);
     }
 }

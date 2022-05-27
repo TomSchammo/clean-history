@@ -3,11 +3,11 @@ use std::{fs, io, path::Path, path::PathBuf};
 const PATH_DISPLAY_ERROR: &str = "Cannot display path";
 const NEWLINE_BYTES: &[u8] = "\n".as_bytes();
 
-pub fn filter(hist_file: PathBuf) {
-    if let Some(filtered_history) = get_filtered_history(hist_file.clone()) {
-        let filtered_history_bytes = get_filtered_history_bytes(filtered_history);
+pub fn filter(hist_file: &PathBuf) {
+    if let Some(filtered_history) = get_filtered_history(&hist_file.clone()) {
+        let filtered_history_bytes = get_filtered_history_bytes(&filtered_history);
 
-        let result = write(filtered_history_bytes, hist_file);
+        let result = write(&filtered_history_bytes, hist_file);
 
         if let Err(..) = result {
             match result.unwrap_err() {
@@ -24,7 +24,7 @@ pub fn filter(hist_file: PathBuf) {
 }
 
 /// Filters all the duplicate lines out of the history file
-fn get_filtered_history(hist_file: PathBuf) -> Option<Vec<String>> {
+fn get_filtered_history(hist_file: &PathBuf) -> Option<Vec<String>> {
     if let Ok(buffer) = fs::read(hist_file) {
         let str = String::from_utf8_lossy(&buffer);
         let lines = str.lines().collect::<Vec<_>>();
@@ -44,7 +44,7 @@ fn get_filtered_history(hist_file: PathBuf) -> Option<Vec<String>> {
 
 /// Turns the String vector that contains the lines into a byte vector
 /// that can be written to a file.
-fn get_filtered_history_bytes(history: Vec<String>) -> Vec<u8> {
+fn get_filtered_history_bytes(history: &Vec<String>) -> Vec<u8> {
     let mut filtered_bytes: Vec<u8> = Vec::new();
 
     for line in history {
@@ -68,7 +68,7 @@ fn get_filtered_history_bytes(history: Vec<String>) -> Vec<u8> {
 /// # Panics
 ///
 /// If the new history file cannot be created and the old history file cannot be restored.
-fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
+fn write(data: &Vec<u8>, hist_file: &PathBuf) -> Result<(), HistFileError> {
     let temp_file = get_temp_file(&hist_file);
 
     match fs::rename(hist_file.clone(), temp_file.clone()) {
@@ -85,7 +85,7 @@ fn write(data: Vec<u8>, hist_file: PathBuf) -> Result<(), HistFileError> {
                 eprintln!("Cannot write data to history file!");
                 eprintln!("{e}");
                 println!("Trying to restore old version...");
-                if restore(temp_file, hist_file).is_ok() {
+                if restore(&temp_file, hist_file).is_ok() {
                     println!("Rollback was successful!");
                     Err(HistFileError::FailedWrite)
                 } else {
@@ -139,7 +139,7 @@ fn get_temp_file(hist_file: &Path) -> PathBuf {
 /// # Errors
 ///
 /// Any error that can occur when calling `std::fs::rename`.
-fn restore(recovery_file: PathBuf, hist_file: PathBuf) -> io::Result<()> {
+fn restore(recovery_file: &PathBuf, hist_file: &PathBuf) -> io::Result<()> {
     match fs::rename(recovery_file.clone(), hist_file) {
         Ok(v) => Ok(v),
         Err(e) => {
