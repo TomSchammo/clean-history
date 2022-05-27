@@ -80,7 +80,7 @@ fn main() {
                 let hist_file = start(args.history);
 
                 loop {
-                    filter(&hist_file.clone());
+                    filter(&hist_file);
 
                     let timout = time::Duration::from_millis(args.timout);
                     thread::sleep(timout);

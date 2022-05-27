@@ -47,15 +47,15 @@ mod tests {
 
     impl Drop for Environment {
         fn drop(&mut self) {
-            if let Some(value) = self.home.clone() {
+            if let Some(value) = &self.home {
                 env::set_var("HOME", value);
             }
 
-            if let Some(value) = self.xdg_config_home.clone() {
+            if let Some(value) = &self.xdg_config_home {
                 env::set_var("XDG_CONFIG_HOME", value);
             }
 
-            if let Some(value) = self.hist_file_path.clone() {
+            if let Some(value) = &self.hist_file_path {
                 env::set_var("HISTFILE", value);
             }
         }

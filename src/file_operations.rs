@@ -4,7 +4,7 @@ const PATH_DISPLAY_ERROR: &str = "Cannot display path";
 const NEWLINE_BYTES: &[u8] = "\n".as_bytes();
 
 pub fn filter(hist_file: &PathBuf) {
-    if let Some(filtered_history) = get_filtered_history(&hist_file.clone()) {
+    if let Some(filtered_history) = get_filtered_history(hist_file) {
         let filtered_history_bytes = get_filtered_history_bytes(&filtered_history);
 
         let result = write(&filtered_history_bytes, hist_file);
@@ -69,10 +69,10 @@ fn get_filtered_history_bytes(history: &Vec<String>) -> Vec<u8> {
 ///
 /// If the new history file cannot be created and the old history file cannot be restored.
 fn write(data: &Vec<u8>, hist_file: &PathBuf) -> Result<(), HistFileError> {
-    let temp_file = get_temp_file(&hist_file);
+    let temp_file = get_temp_file(hist_file);
 
-    match fs::rename(hist_file.clone(), temp_file.clone()) {
-        Ok(_) => match fs::write(hist_file.clone(), data) {
+    match fs::rename(hist_file, temp_file.clone()) {
+        Ok(_) => match fs::write(hist_file, data) {
             Ok(_) => match fs::remove_file(temp_file) {
                 Ok(_) => Ok(()),
                 Err(e) => {
@@ -140,7 +140,7 @@ fn get_temp_file(hist_file: &Path) -> PathBuf {
 ///
 /// Any error that can occur when calling `std::fs::rename`.
 fn restore(recovery_file: &PathBuf, hist_file: &PathBuf) -> io::Result<()> {
-    match fs::rename(recovery_file.clone(), hist_file) {
+    match fs::rename(recovery_file, hist_file) {
         Ok(v) => Ok(v),
         Err(e) => {
             eprintln!("Could not recover file!");
