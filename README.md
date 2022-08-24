@@ -32,4 +32,7 @@ The program filters out duplicates from your history.
 
 - [ ] Intelligent file tracking to remove any commands that access/
       interact with files that no longer exist
+- [ ] Configuration
+- [ ] Command Blacklist
+- [ ] Character Limit
 - [ ] Support for automatically finding bash_history (maybe)
